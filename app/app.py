@@ -265,7 +265,6 @@ def toggle_registration():
 def list_topics():
     all_topics = []
 
-    # Iterate through all topics and append them to the list without any filtering
     for folder in os.listdir(DATA_DIR):
         folder_path = os.path.join(DATA_DIR, folder)
         if os.path.isdir(folder_path):
@@ -280,12 +279,17 @@ def list_topics():
                     file_count = len(os.listdir(files_dir)) if os.path.exists(files_dir) else 0
                     topic['file_count'] = file_count
                     topic['folder'] = folder
+
+                    # Use the edition_date from JSON
+                    topic['last_modified'] = topic.get('edition_date', 'N/A')
+
                     all_topics.append(topic)
 
     if not all_topics:
         flash("No topics available.", "warning")
 
     return render_template('list.html', topics=all_topics)
+
 
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
@@ -294,26 +298,29 @@ def search_topic():
         search_term = request.form.get('search_term')
         found_topics = []
 
-        # Iterate through all topics and search by keyword without filtering
+        # Iterate through all topics and search by keyword
         for folder in os.listdir(DATA_DIR):
-            if os.path.isdir(os.path.join(DATA_DIR, folder)) and folder.isdigit():
-                json_file = os.path.join(DATA_DIR, folder, f"{folder}.json")
+            folder_path = os.path.join(DATA_DIR, folder)
+            if os.path.isdir(folder_path):
+                json_file = os.path.join(folder_path, f"{folder}.json")
                 if os.path.exists(json_file):
                     with open(json_file, 'r') as f:
                         data = json.load(f)
-                        for topic in data:
-                            # Check if the search term matches the topic name
-                            if search_term.lower() in topic["topic"].lower():
-                                files_dir = os.path.join(DATA_DIR, folder, "files")
-                                file_count = len(os.listdir(files_dir)) if os.path.exists(files_dir) else 0
+                        topic = data[0]
+                        if search_term.lower() in topic.get("topic", "").lower():
+                            # Get file count and edition date
+                            files_dir = os.path.join(folder_path, "files")
+                            file_count = len(os.listdir(files_dir)) if os.path.exists(files_dir) else 0
+                            edition_date = topic.get('edition_date', 'N/A')
 
-                                found_topics.append({
-                                    'id': topic["topic_id"],
-                                    'name': topic["topic"],
-                                    'folder': folder,
-                                    'file_count': file_count,
-                                    'editor': topic["editor"]
-                                })
+                            found_topics.append({
+                                'id': topic.get("topic_id"),
+                                'name': topic.get("topic"),
+                                'folder': folder,
+                                'file_count': file_count,
+                                'editor': topic.get("editor"),
+                                'last_modified': edition_date  # Use edition date from JSON
+                            })
 
         if not found_topics:
             flash("No topics found with that term.", "danger")
@@ -321,6 +328,7 @@ def search_topic():
         return render_template('search_results.html', topics=found_topics, search_term=search_term)
 
     return render_template('search.html')
+
 
 @app.route('/files/<topic_id>/<filename>')
 @login_required

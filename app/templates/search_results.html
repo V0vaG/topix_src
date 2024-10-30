@@ -17,7 +17,6 @@
             margin: 0;
         }
 
-        /* Container styling */
         .container {
             background-color: white;
             padding: 30px 50px;
@@ -27,7 +26,6 @@
             max-width: 800px;
         }
 
-        /* Heading style */
         h1 {
             font-size: 2rem;
             color: #333;
@@ -35,7 +33,6 @@
             text-align: center;
         }
 
-        /* Table styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -57,7 +54,6 @@
             background-color: #f2f2f2;
         }
 
-        /* Making entire row clickable */
         .clickable-row {
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -67,7 +63,6 @@
             background-color: #e9f5e9;
         }
 
-        /* Link styling for the whole row */
         .clickable-row a {
             display: block;
             color: inherit;
@@ -76,7 +71,11 @@
             height: 100%;
         }
 
-        /* Back to home button styling */
+        /* Hide Topic ID column */
+        .hidden {
+            display: none;
+        }
+
         .nav-button {
             padding: 12px 25px;
             background-color: #4CAF50;
@@ -109,19 +108,21 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th class="hidden">ID</th> <!-- Hidden column for ID -->
                     <th>Topic Name</th>
                     <th>Number of Files</th>
-                    <th>Author</th> <!-- New column for Author -->
+                    <th>Author</th>
+                    <th>Last Modified</th> <!-- New column for Last Modified -->
                 </tr>
             </thead>
             <tbody>
                 {% for topic in topics %}
                 <tr class="clickable-row">
-                    <td><a href="{{ url_for('show_topic', folder=topic.folder, id=topic.id) }}">{{ topic.id }}</a></td>
+                    <td class="hidden"><a href="{{ url_for('show_topic', folder=topic.folder, id=topic.id) }}">{{ topic.id }}</a></td> <!-- Hidden cell for ID -->
                     <td><a href="{{ url_for('show_topic', folder=topic.folder, id=topic.id) }}">{{ topic.name }}</a></td>
-                    <td>{{ topic.file_count }} files</td> <!-- Display the number of files -->
-                    <td>{{ topic.editor }}</td> <!-- Display the editor (author) -->
+                    <td>{{ topic.file_count }} files</td>
+                    <td>{{ topic.editor }}</td>
+                    <td>{{ topic.last_modified }}</td> <!-- Display Edition Date -->
                 </tr>
                 {% endfor %}
             </tbody>
