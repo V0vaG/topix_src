@@ -106,13 +106,26 @@
         <table>
             <thead>
                 <tr>
-                    <th class="hidden">ID</th> <!-- Hidden column for ID -->
-                    <th>Topic Name</th>
+                    <th class="hidden">ID</th>
+                    <th>
+                        <a href="{{ url_for('list_topics', sort_by='topic', sort_order='asc' if sort_order == 'desc' else 'desc') }}">
+                            Topic Name
+                        </a>
+                    </th>
                     <th>Number of Files</th>
-                    <th>Author</th>
-                    <th>Last Modified</th> <!-- Column for Edition Date -->
+                    <th>
+                        <a href="{{ url_for('list_topics', sort_by='editor', sort_order='asc' if sort_order == 'desc' else 'desc') }}">
+                            Author
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('list_topics', sort_by='last_modified', sort_order='asc' if sort_order == 'desc' else 'desc') }}">
+                            Last Modified
+                        </a>
+                    </th>
                 </tr>
             </thead>
+            
             <tbody>
                 {% for topic in topics %}
                 <tr class="clickable-row">

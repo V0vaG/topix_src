@@ -263,6 +263,9 @@ def toggle_registration():
 @app.route('/list')
 @login_required
 def list_topics():
+    sort_by = request.args.get('sort_by', 'topic')  # Default sort by topic name
+    sort_order = request.args.get('sort_order', 'asc')  # Default sort order is ascending
+
     all_topics = []
 
     for folder in os.listdir(DATA_DIR):
@@ -274,21 +277,22 @@ def list_topics():
                     data = json.load(f)
                     topic = data[0]
 
-                    # Get the number of files in the topic's folder
                     files_dir = os.path.join(folder_path, "files")
                     file_count = len(os.listdir(files_dir)) if os.path.exists(files_dir) else 0
                     topic['file_count'] = file_count
                     topic['folder'] = folder
-
-                    # Use the edition_date from JSON
                     topic['last_modified'] = topic.get('edition_date', 'N/A')
 
                     all_topics.append(topic)
 
+    # Sort the topics based on the query parameters
+    reverse_order = (sort_order == 'desc')
+    all_topics.sort(key=lambda x: x.get(sort_by, ''), reverse=reverse_order)
+
     if not all_topics:
         flash("No topics available.", "warning")
 
-    return render_template('list.html', topics=all_topics)
+    return render_template('list.html', topics=all_topics, sort_by=sort_by, sort_order=sort_order)
 
 
 @app.route('/search', methods=['GET', 'POST'])
